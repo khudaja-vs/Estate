@@ -12,7 +12,9 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.4",
+    "body-parser": "^2.3.0",
     "dotenv": "^17.4.2",
+    "express": "^5.2.1",
     "mongoose": "^9.6.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
