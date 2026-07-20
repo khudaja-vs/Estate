@@ -55,13 +55,13 @@ export const google = async (req, res, next) => {
         Math.random().toString(36).slice(-8);
       const hashPassword = bcryptjs.hashSync(generatedPassword, 10);
       const newUser = new User({
-        username: req.body.name.split(" ").json("").toLowerCase() + Math.random().toString(36).slice(-4 ),
+        username: req.body.name.split(" ").join("").toLowerCase() + Math.random().toString(36).slice(-4 ),
         email: req.body.email,
-        pasword: hashPassword,
-        avatar: req.body.photo,
+        password: hashPassword,
+        avatar: req.body.photo || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
       });
       await newUser.save();
-      consttoken = jwt.sign({id: newUser._id}, process.env.JWT_SECRET);
+      const token = jwt.sign({id: newUser._id}, process.env.JWT_SECRET);
       const {password:pass, ...rest} = newUser._doc;
       res.cookie('access_token', token, {httpOnly:true}).status(200).json(rest);
     }
