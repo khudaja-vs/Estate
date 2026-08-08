@@ -1,0 +1,13 @@
+Cloud name = rnfardu8
+default
+API = 795534382268368
+API_SECRET = TuDqGpESxyPQblevfcCyPReovqM
+PRESET ID (PID) = d099e0d5-bc4b-41eb-b0ff-e539605eb00e
+Cloudinary_Preset_Name = ml_default
+
+unsign i create
+API = 795534382268368
+API_SECRET = TuDqGpESxyPQblevfcCyPReovqM
+PRESET ID (PID) = d099e0d5-bc4b-41eb-b0ff-e539605eb00e
+Cloudinary_Preset_Name = e-state
+
