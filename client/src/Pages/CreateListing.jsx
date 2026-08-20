@@ -6,7 +6,6 @@ export default function CreateListing() {
   const { currentUser } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const [files, setFiles] = useState([]);
-  const [previews, setPreviews] = useState([]);
   const [formData, setFormData] = useState({
     imageUrls: [],
     name: '',
@@ -317,12 +316,7 @@ export default function CreateListing() {
           </p>
           <div className='flex gap-4'>
             <input
-              onChange={(e) => {
-                const fileList = e.target.files ? Array.from(e.target.files) : [];
-                setFiles(fileList);
-                const urls = fileList.map((f) => URL.createObjectURL(f));
-                setPreviews(urls);
-              }}
+              onChange={(e) => setFiles(e.target.files)}
               className='p-3 border border-gray-300 rounded w-full'
               type='file'
               id='images'
@@ -361,19 +355,6 @@ export default function CreateListing() {
                 </button>
               </div>
             ))}
-
-          {previews.length > 0 && (
-            <div className='flex gap-4 flex-wrap mt-2'>
-              {previews.map((src, i) => (
-                <img
-                  key={src}
-                  src={src}
-                  alt={`preview-${i}`}
-                  className='w-20 h-20 object-cover rounded-lg'
-                />
-              ))}
-            </div>
-          )}
           <button
             disabled={loading || uploading}
             className='p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80'
