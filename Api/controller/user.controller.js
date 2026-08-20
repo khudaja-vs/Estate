@@ -1,19 +1,19 @@
 import bcryptjs from 'bcryptjs';
 import User from '../models/user.model.js';
 import { errorHandler } from '../utils/error.js';
+import Listing from '../models/listing.model.js';
 
+
+// 1. Update User Controller (Yeh Missing Tha)
 export const updateUser = async (req, res, next) => {
-  // Check karein ke token ka user id aur params ki id same hai ya nahi
   if (req.user.id !== req.params.id)
     return next(errorHandler(401, 'You can only update your own account!'));
 
   try {
-    // Agar password change kar rahe hain toh usay hash karein
     if (req.body.password) {
       req.body.password = bcryptjs.hashSync(req.body.password, 10);
     }
 
-    // Database mein user update karein
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       {
@@ -21,18 +21,53 @@ export const updateUser = async (req, res, next) => {
           username: req.body.username,
           email: req.body.email,
           password: req.body.password,
-          avatar: req.body.avatar, // <-- Yeh Cloudinary / image URL update karega
+          avatar: req.body.avatar,
         },
       },
-      { new: true } // Updated data return karne ke liye
+      { new: true }
     );
 
-    // Password rest response se exclude karein
     const { password, ...rest } = updatedUser._doc;
 
-    // Response send karein
     res.status(200).json(rest);
   } catch (error) {
     next(error);
+  }
+};
+
+// 2. Delete User Account Controller
+export const deleteUser = async (req, res, next) => {
+  if (req.user.id !== req.params.id)
+    return next(errorHandler(401, 'You can only delete your own account!'));
+
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.clearCookie('access_token');
+    res.status(200).json('User has been deleted!');
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 3. Sign Out Controller
+export const signOut = async (req, res, next) => {
+  try {
+    res.clearCookie('access_token');
+    res.status(200).json('User has been logged out!');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUserListings = async (req, res, next) => {
+  if (req.user.id === req.params.id) {
+    try {
+      const listings = await Listing.find({ userRef: req.params.id });
+      res.status(200).json(listings);
+    } catch (error) {
+      next(error);
+    }
+  } else {
+    return next(errorHandler(401, 'You can only view your own listings!'));
   }
 };

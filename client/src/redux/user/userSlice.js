@@ -10,6 +10,7 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
+    // 1. Sign In Reducers (MISSING THE ISLIYE ERROR AAYA THA)
     signInStart: (state) => {
       state.loading = true;
     },
@@ -22,7 +23,8 @@ const userSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
-    // Update Profile Reducers (Yeh miss ho gaye thay):
+
+    // 2. Update User Reducers
     updateUserStart: (state) => {
       state.loading = true;
     },
@@ -32,6 +34,34 @@ const userSlice = createSlice({
       state.error = null;
     },
     updateUserFailure: (state, action) => {
+      state.error = action.payload;
+      state.loading = false;
+    },
+
+    // 3. Delete User Reducers
+    deleteUserStart: (state) => {
+      state.loading = true;
+    },
+    deleteUserSuccess: (state) => {
+      state.currentUser = null;
+      state.loading = false;
+      state.error = null;
+    },
+    deleteUserFailure: (state, action) => {
+      state.error = action.payload;
+      state.loading = false;
+    },
+
+    // 4. Sign Out Reducers
+    signOutUserStart: (state) => {
+      state.loading = true;
+    },
+    signOutUserSuccess: (state) => {
+      state.currentUser = null;
+      state.loading = false;
+      state.error = null;
+    },
+    signOutUserFailure: (state, action) => {
       state.error = action.payload;
       state.loading = false;
     },
@@ -45,6 +75,12 @@ export const {
   updateUserStart,
   updateUserSuccess,
   updateUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
+  signOutUserStart,
+  signOutUserSuccess,
+  signOutUserFailure,
 } = userSlice.actions;
 
 export default userSlice.reducer;

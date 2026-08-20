@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import OAuth from '../components/OAuth.jsx';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from '../redux/user/userSlice.js';
 
 export default function SignIn() {
   const dispatch = useDispatch();
+  const { loading, error } = useSelector((state) => state.user);
   const [formData, setFormData] = useState({});
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -20,7 +24,9 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setLoading(true);
+      // 1. Redux Loading Start
+      dispatch(signInStart());
+
       const res = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: {
@@ -29,20 +35,20 @@ export default function SignIn() {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      console.log(data);
 
       if (data.success === false) {
-        setLoading(false);
-        setError(data.message);
+        // 2. Redux Error Save
+        dispatch(signInFailure(data.message));
         return;
       }
       
-      setLoading(false);
-      setError(null);
-      navigate('/'); // Login successful hone par direct homepage (/) par bhejna
+      // 3. Redux Store mein User Data Save (Header Avatar update hoga)
+      dispatch(signInSuccess(data));
+      
+      // 4. Direct Homepage par Navigate
+      navigate('/'); 
     } catch (error) {
-      setLoading(false);
-      setError(error.message);
+      dispatch(signInFailure(error.message));
     }
   };
 
@@ -67,7 +73,7 @@ export default function SignIn() {
 
         <button
           disabled={loading}
-          className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80'
+          className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80 cursor-pointer'
         >
           {loading ? 'Loading...' : 'Sign In'}
         </button>
@@ -76,7 +82,7 @@ export default function SignIn() {
       <div className='flex gap-2 mt-5'>
         <p>Dont have an account?</p>
         <Link to={'/sign-up'}>
-          <span className='text-blue-700'>Sign up</span>
+          <span className='text-blue-700 hover:underline'>Sign up</span>
         </Link>
       </div>
       {error && <p className='text-red-500 mt-5'>{error}</p>}
