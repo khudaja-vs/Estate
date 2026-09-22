@@ -65,3 +65,20 @@ export const getListing = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getListings = async (req, res, next) => {
+  try {
+    const { searchTerm = '', type = 'all', parking, furnished, offer, sort = 'createdAt', order = 'desc', startIndex = 0, limit = 9 } = req.query;
+    const filters = {};
+    if (searchTerm.trim()) filters.$or = [{ name: { $regex: searchTerm.trim(), $options: 'i' } }, { address: { $regex: searchTerm.trim(), $options: 'i' } }];
+    if (type !== 'all') filters.type = type;
+    if (parking === 'true') filters.parking = true;
+    if (furnished === 'true') filters.furnished = true;
+    if (offer === 'true') filters.offer = true;
+    const sortField = sort === 'regularPrice' ? 'regularPrice' : 'createdAt';
+    const listings = await Listing.find(filters).sort({ [sortField]: order === 'asc' ? 1 : -1 }).skip(Number(startIndex)).limit(Math.min(Number(limit), 24));
+    res.status(200).json(listings);
+  } catch (error) {
+    next(error);
+  }
+};

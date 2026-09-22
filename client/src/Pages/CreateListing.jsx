@@ -36,12 +36,18 @@ export default function CreateListing() {
         method: 'POST',
         body: data,
       })
-        .then((res) => res.json())
+        .then(async (res) => {
+          const responseData = await res.json();
+          if (!res.ok) {
+            throw new Error(responseData.error?.message || 'Cloudinary upload failed');
+          }
+          return responseData;
+        })
         .then((data) => {
           if (data.secure_url) {
             resolve(data.secure_url);
           } else {
-            reject(data);
+            reject(new Error(data.error?.message || 'Cloudinary returned no image URL'));
           }
         })
         .catch((err) => reject(err));
@@ -69,7 +75,7 @@ export default function CreateListing() {
           setUploading(false);
         })
         .catch((err) => {
-          setImageUploadError('Image upload failed (2 mb max per image)');
+          setImageUploadError(err.message || 'Image upload failed (2 mb max per image)');
           setUploading(false);
         });
     } else {

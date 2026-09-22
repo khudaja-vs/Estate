@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from 'react-router-dom';
 import { Link } from "react-router-dom";
 import {
   updateUserStart,
@@ -21,6 +22,7 @@ export default function Profile() {
     error,
   } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [filePreview, setFilePreview] = useState("");
   const [imageUploading, setImageUploading] = useState(false);
@@ -56,10 +58,14 @@ export default function Profile() {
       const uploadedData = await res.json();
       setImageUploading(false);
 
+      if (!res.ok) {
+        throw new Error(uploadedData.error?.message || "Cloudinary upload failed");
+      }
+
       if (uploadedData.secure_url) {
         setFormData((prev) => ({ ...prev, avatar: uploadedData.secure_url }));
       } else {
-        console.error("Cloudinary Upload Failed:", uploadedData);
+        throw new Error(uploadedData.error?.message || "Cloudinary returned no image URL");
       }
     } catch (err) {
       setImageUploading(false);
@@ -143,15 +149,21 @@ export default function Profile() {
   // 5. Show User Listings Handler (06:44:38)
   const handleShowListings = async () => {
     try {
+      if (!currentUser || !currentUser._id) {
+        // If user not signed in, send them to sign-in page
+        navigate('/sign-in');
+        return;
+      }
+
       setShowListingsError(false);
-      const res = await fetch(`/api/user/listings/${currentUser._id}`);
+      const res = await fetch('/api/user/listings');
       const data = await res.json();
       if (data.success === false) {
-        setShowListingsError(true);
-        return;
+        throw new Error(data.message || 'Unable to load listings');
       }
       setUserListings(data);
     } catch (err) {
+      console.error('Show listings error:', err.message || err);
       setShowListingsError(true);
     }
   };
@@ -188,7 +200,7 @@ export default function Profile() {
           accept="image/*"
           onChange={handleFileUpload}
         />
-
+          
         <div className="self-center relative flex flex-col items-center">
           <img
             onClick={() => fileRef.current.click()}
@@ -270,7 +282,12 @@ export default function Profile() {
       )}
 
       {/* SHOW LISTINGS BUTTON */}
-      <button onClick={handleShowListings} className="text-green-700 w-full mt-3">
+      <button
+        type="button"
+        onClick={handleShowListings}
+        disabled={!currentUser}
+        className={`text-green-700 w-full mt-3 ${!currentUser ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+      >
         Show Listings
       </button>
       {showListingsError && (
