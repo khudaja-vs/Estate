@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import dns from 'dns';
 import userRouter from './routes/user.route.js';
 import authRouter from './routes/auth.route.js';
 import cookieParser from 'cookie-parser';
@@ -9,6 +10,10 @@ import contactRouter from './routes/contact.route.js';
 
 dotenv.config();
 
+// Some local DNS resolvers (VPN/router stub resolvers) refuse SRV record
+// queries, which breaks mongodb+srv:// lookups even though normal DNS works.
+// Forcing a public resolver here avoids that failure mode.
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 mongoose.connect(process.env.MONGO)
   .then(() => {
